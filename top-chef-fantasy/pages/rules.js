@@ -39,45 +39,45 @@ const RulesPage = () => {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">Scoring System</h2>
               <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse">
+                <table className="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden shadow-sm">
                   <thead>
-                    <tr className="bg-gray-100">
-                      <th className="px-4 py-2 text-left border">Achievement</th>
-                      <th className="px-4 py-2 text-center border">Points</th>
+                    <tr>
+                      <th className="px-6 py-3 bg-indigo-50 text-left text-xs font-medium text-indigo-800 uppercase tracking-wider">Achievement</th>
+                      <th className="px-6 py-3 bg-indigo-50 text-center text-xs font-medium text-indigo-800 uppercase tracking-wider">Points</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <td className="px-4 py-2 border">Winning Quickfire Challenge</td>
-                      <td className="px-4 py-2 text-center border">+5</td>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    <tr className="bg-white">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">Winning Quickfire Challenge</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center font-medium text-green-600">+5</td>
                     </tr>
-                    <tr>
-                      <td className="px-4 py-2 border">Top 3 in Quickfire</td>
-                      <td className="px-4 py-2 text-center border">+3</td>
+                    <tr className="bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">Top 3 in Quickfire</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center font-medium text-green-600">+3</td>
                     </tr>
-                    <tr>
-                      <td className="px-4 py-2 border">Winning Elimination Challenge</td>
-                      <td className="px-4 py-2 text-center border">+10</td>
+                    <tr className="bg-white">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">Winning Elimination Challenge</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center font-medium text-green-600">+10</td>
                     </tr>
-                    <tr>
-                      <td className="px-4 py-2 border">Top 3 in Elimination Challenge</td>
-                      <td className="px-4 py-2 text-center border">+5</td>
+                    <tr className="bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">Top 3 in Elimination Challenge</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center font-medium text-green-600">+5</td>
                     </tr>
-                    <tr>
-                      <td className="px-4 py-2 border">Bottom 3 in Elimination Challenge</td>
-                      <td className="px-4 py-2 text-center border">-3</td>
+                    <tr className="bg-white">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">Bottom 3 in Elimination Challenge</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center font-medium text-red-600">-3</td>
                     </tr>
-                    <tr>
-                      <td className="px-4 py-2 border">Eliminated</td>
-                      <td className="px-4 py-2 text-center border">-5</td>
+                    <tr className="bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">Eliminated</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center font-medium text-red-600">-5</td>
                     </tr>
-                    <tr>
-                      <td className="px-4 py-2 border">Winning Restaurant Wars</td>
-                      <td className="px-4 py-2 text-center border">+8</td>
+                    <tr className="bg-white">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">Winning Restaurant Wars</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center font-medium text-green-600">+8</td>
                     </tr>
-                    <tr>
-                      <td className="px-4 py-2 border">Special Challenge Winner</td>
-                      <td className="px-4 py-2 text-center border">+7</td>
+                    <tr className="bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">Special Challenge Winner</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center font-medium text-green-600">+7</td>
                     </tr>
                   </tbody>
                 </table>
