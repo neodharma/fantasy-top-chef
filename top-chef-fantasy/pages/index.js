@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getTeams } from '../lib/api';
+import Link from 'next/link';
 
 const HomePage = () => {
   const [teams, setTeams] = useState([]);
