@@ -1,17 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-import { teams as sampleTeams } from '../data/teams';
-import Link from 'next/link';
-// Then use sampleTeams instead of the hardcoded array
+import { getTeams } from '../lib/api';
 
 const HomePage = () => {
-  const [teams, setTeams] = useState(sampleTeams);
+  const [teams, setTeams] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    async function fetchTeams() {
+      setLoading(true);
+      const teamsData = await getTeams();
+      setTeams(teamsData);
+      setLoading(false);
+    }
+    
+    fetchTeams();
+  }, []);
   
   // Sort teams by points (highest first)
   const sortedTeams = [...teams].sort((a, b) => b.totalPoints - a.totalPoints);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p className="text-xl">Loading teams...</p>
+      </div>
+    );
+  }
+
   return (
+    // Rest of your component remains the same, but using sortedTeams
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-2">Top Chef Fantasy League</h1>
