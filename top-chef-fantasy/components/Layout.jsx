@@ -7,24 +7,24 @@ const Layout = ({ children }) => {
     <div className="min-h-screen flex flex-col">
       <header className="bg-indigo-700 text-white shadow-md">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/">
-            <a className="text-2xl font-bold">Top Chef Fantasy</a>
+          <Link href="/" className="text-2xl font-bold">
+            Top Chef Fantasy
           </Link>
           <nav>
             <ul className="flex space-x-6">
               <li>
-                <Link href="/">
-                  <a className="hover:text-indigo-200 transition-colors">Standings</a>
+                <Link href="/" className="hover:text-indigo-200 transition-colors">
+                  Standings
                 </Link>
               </li>
               <li>
-                <Link href="/chef-scores">
-                  <a className="hover:text-indigo-200 transition-colors">Chef Scores</a>
+                <Link href="/chef-scores" className="hover:text-indigo-200 transition-colors">
+                  Chef Scores
                 </Link>
               </li>
               <li>
-                <Link href="/rules">
-                  <a className="hover:text-indigo-200 transition-colors">Rules</a>
+                <Link href="/rules" className="hover:text-indigo-200 transition-colors">
+                  Rules
                 </Link>
               </li>
             </ul>
