@@ -20,9 +20,13 @@ const [isRosterModalOpen, setIsRosterModalOpen] = useState(false);
   const router = useRouter();
   const { isAuthenticated, isLoading, logout } = useAdminAuth();
   
-  const fetchTeamRosters = async () => {
+// Update your fetchTeamRosters function
+const fetchTeamRosters = async () => {
+    // Start with the current teams data
+    const currentTeams = [...teams];
+    
     const updatedTeams = await Promise.all(
-      teams.map(async (team) => {
+      currentTeams.map(async (team) => {
         // Get team's chefs
         const { data: teamChefs, error: teamChefsError } = await supabase
           .from('team_chefs')
@@ -34,7 +38,7 @@ const [isRosterModalOpen, setIsRosterModalOpen] = useState(false);
           return { ...team, roster: [] };
         }
         
-        if (!teamChefs.length) {
+        if (!teamChefs || !teamChefs.length) {
           return { ...team, roster: [] };
         }
         
@@ -46,7 +50,7 @@ const [isRosterModalOpen, setIsRosterModalOpen] = useState(false);
           .select('name')
           .in('id', chefIds);
         
-        if (chefsError) {
+        if (chefsError || !chefs) {
           console.error(`Error fetching chef details for team ${team.id}:`, chefsError);
           return { ...team, roster: [] };
         }
@@ -58,8 +62,111 @@ const [isRosterModalOpen, setIsRosterModalOpen] = useState(false);
       })
     );
     
-    setTeams(updatedTeams);
+    // Only update state if we have data
+    if (updatedTeams && updatedTeams.length > 0) {
+      setTeams(updatedTeams);
+    } else {
+      console.warn("No updated teams data to display");
+    }
   };
+
+  const deleteChef = async (chefId) => {
+    if (!confirm('Are you sure you want to delete this chef? This action cannot be undone.')) {
+      return;
+    }
+  
+    try {
+      // First check if chef is part of any team
+      const { data: teamChefs, error: teamChefsError } = await supabase
+        .from('team_chefs')
+        .select('*')
+        .eq('chef_id', chefId);
+      
+      if (teamChefsError) {
+        throw new Error(`Error checking team assignments: ${teamChefsError.message}`);
+      }
+      
+      // If chef is assigned to teams, prompt user
+      if (teamChefs && teamChefs.length > 0) {
+        if (!confirm(`This chef is currently assigned to ${teamChefs.length} team(s). Deleting will remove them from these teams. Continue?`)) {
+          return;
+        }
+        
+        // Delete team assignments first
+        const { error: deleteAssignmentsError } = await supabase
+          .from('team_chefs')
+          .delete()
+          .eq('chef_id', chefId);
+        
+        if (deleteAssignmentsError) {
+          throw new Error(`Error removing team assignments: ${deleteAssignmentsError.message}`);
+        }
+      }
+      
+      // Now delete chef scores if any
+      const { error: deleteScoresError } = await supabase
+        .from('chef_scores')
+        .delete()
+        .eq('chef_id', chefId);
+      
+      if (deleteScoresError) {
+        throw new Error(`Error removing chef scores: ${deleteScoresError.message}`);
+      }
+      
+      // Finally delete the chef
+      const { error: deleteChefError } = await supabase
+        .from('chefs')
+        .delete()
+        .eq('id', chefId);
+      
+      if (deleteChefError) {
+        throw new Error(`Error deleting chef: ${deleteChefError.message}`);
+      }
+      
+      // Update state
+      setChefs(chefs.filter(chef => chef.id !== chefId));
+      setMessage({ text: 'Chef deleted successfully!', type: 'success' });
+    } catch (error) {
+      console.error('Error deleting chef:', error);
+      setMessage({ text: error.message, type: 'error' });
+    }
+  };
+
+  const deleteTeam = async (teamId) => {
+    if (!confirm('Are you sure you want to delete this team? This action cannot be undone.')) {
+      return;
+    }
+  
+    try {
+      // First delete team chef assignments
+      const { error: deleteAssignmentsError } = await supabase
+        .from('team_chefs')
+        .delete()
+        .eq('team_id', teamId);
+      
+      if (deleteAssignmentsError) {
+        throw new Error(`Error removing team chef assignments: ${deleteAssignmentsError.message}`);
+      }
+      
+      // Delete the team
+      const { error: deleteTeamError } = await supabase
+        .from('teams')
+        .delete()
+        .eq('id', teamId);
+      
+      if (deleteTeamError) {
+        throw new Error(`Error deleting team: ${deleteTeamError.message}`);
+      }
+      
+      // Update state
+      setTeams(teams.filter(team => team.id !== teamId));
+      setMessage({ text: 'Team deleted successfully!', type: 'success' });
+    } catch (error) {
+      console.error('Error deleting team:', error);
+      setMessage({ text: error.message, type: 'error' });
+    }
+  };
+
   // Function to refresh all data
 const refreshData = async () => {
   setLoading(true);
@@ -82,6 +189,7 @@ const refreshData = async () => {
       .order('id');
     
     if (teamsError) throw new Error(`Error fetching teams: ${teamsError.message}`);
+    console.log("Teams data from Supabase:", teamsData);
     setTeams(teamsData);
     
     // Fetch episodes
@@ -415,7 +523,6 @@ const refreshData = async () => {
     <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">ID</th>
     <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Team Name</th>
     <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Owner</th>
-    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Roster</th>
     <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
   </tr>
 </thead>
@@ -435,6 +542,14 @@ const refreshData = async () => {
                               </span>
                             )}
                           </td>
+                          <td className="px-4 py-3 text-sm">
+  <button 
+    onClick={() => deleteChef(chef.id)}
+    className="text-red-600 hover:text-red-800"
+  >
+    Delete
+  </button>
+</td>
                         </tr>
                       ))}
                     </tbody>
@@ -490,6 +605,7 @@ const refreshData = async () => {
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">ID</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Team Name</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Owner</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Roster</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
                       </tr>
                     </thead>
@@ -512,16 +628,24 @@ const refreshData = async () => {
         )}
       </td>
       <td className="px-4 py-3 text-sm">
-        <button 
-          className="text-blue-600 hover:text-blue-800"
-          onClick={() => {
-            setEditingTeam(team);
-            setIsRosterModalOpen(true);
-          }}
-        >
-          Edit Roster
-        </button>
-      </td>
+  <div className="flex space-x-3">
+    <button 
+      className="text-blue-600 hover:text-blue-800"
+      onClick={() => {
+        setEditingTeam(team);
+        setIsRosterModalOpen(true);
+      }}
+    >
+      Edit Roster
+    </button>
+    <button 
+      className="text-red-600 hover:text-red-800"
+      onClick={() => deleteTeam(team.id)}
+    >
+      Delete
+    </button>
+  </div>
+</td>
     </tr>
   ))}
 </tbody>
@@ -683,11 +807,6 @@ const refreshData = async () => {
             )}
 </div>
 </div>
-</div>
-</div>
-);
-};
-
 {/* Edit Roster Modal */}
 {isRosterModalOpen && (
     <EditRosterModal
@@ -699,5 +818,11 @@ const refreshData = async () => {
       team={editingTeam}
     />
   )}
+</div>
+</div>
+);
+};
+
+
 
 export default AdminPage;
