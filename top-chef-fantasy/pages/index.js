@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { teams as sampleTeams } from '../data/teams';
+import Link from 'next/link';
 // Then use sampleTeams instead of the hardcoded array
 
 const HomePage = () => {
@@ -41,9 +42,9 @@ const HomePage = () => {
         </div>
         
         <div className="mt-8 text-center">
-          <a href="/chef-scores" className="text-blue-600 hover:underline text-lg">
+          <Link href="/chef-scores" className="text-blue-600 hover:underline text-lg">
             View Chef Performance By Episode →
-          </a>
+          </Link>
         </div>
       </div>
     </div>

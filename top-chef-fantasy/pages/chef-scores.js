@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { chefs as sampleChefData } from '../data/chefs';
@@ -34,7 +35,7 @@ const ChefScoresPage = () => {
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <a href="/" className="text-blue-600 hover:underline">← Back to Standings</a>
+          <Link href="/" className="text-blue-600 hover:underline">← Back to Standings</Link>
           <h1 className="text-3xl font-bold text-center">Chef Performance By Episode</h1>
           <div className="w-20"></div> {/* Empty div for balance */}
         </div>
