@@ -8,7 +8,6 @@ const ChefScoresPage = () => {
   const [episodes, setEpisodes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('status');
-  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -100,7 +99,7 @@ const ChefScoresPage = () => {
     fetchData();
   }, []);
     //Sort logic and return rendering stay the same, with a minor change
-      const sortedChefs = [...chefData].sort((a, b) => {
+    const sortedChefs = [...chefData].sort((a, b) => {
     if (sortBy === 'totalPoints') {
       return b.totalPoints - a.totalPoints;
     } else if (sortBy === 'name') {
@@ -116,10 +115,10 @@ const ChefScoresPage = () => {
       }
       return statusCompare;
     } else if (sortBy.startsWith('episode-')) {
-        const episodeIndex = parseInt(sortBy.split('-')[1]);
-        //THIS IS IMPORTANT: if one of the chefs doesn't have a score for that episode, sort them to the bottom
-        const scoreA = a.scores[episodeIndex].score === null ? -Infinity : a.scores[episodeIndex].score;
-        const scoreB = b.scores[episodeIndex].score === null ? -Infinity : b.scores[episodeIndex].score;
+      const episodeIndex = parseInt(sortBy.split('-')[1]);
+      //THIS IS IMPORTANT: if one of the chefs doesn't have a score for that episode, sort them to the bottom
+      const scoreA = a.scores[episodeIndex].score === null ? -Infinity : a.scores[episodeIndex].score;
+      const scoreB = b.scores[episodeIndex].score === null ? -Infinity : b.scores[episodeIndex].score;
       return scoreB - scoreA;
     }
     return 0;
@@ -148,140 +147,169 @@ const renderScoreCell = (chef, episodeIndex) => {
     
     return (
       <td key={episodeIndex} className="px-4 py-3 text-center group relative">
-        <div className="flex flex-col items-center">
-          <span className={`inline-block w-8 h-8 rounded-full flex items-center justify-center ${bgColor}`}>
-            {score}
-          </span>
-          {icons.length > 0 && (
-            <span className="text-xs mt-1">{icons.join(' ')}</span>
-          )}
+      {/* Main score display - remains in the flow */}
+      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${bgColor}`}>
+        {score}
+      </div>
+
+      {/* Icon container - positioned absolutely */}
+      {icons.length > 0 && (
+        <div className="absolute top-1 right-1 flex space-x-1">
+          {icons.map((icon, index) => (
+            <span key={index} className="text-xs">
+              {icon}
+            </span>
+          ))}
         </div>
-        
-        {/* Tooltip with details */}
-        {(scoreData.quickfire_winner || scoreData.quickfire_top || scoreData.quickfire_bottom || 
-          scoreData.elimination_winner || scoreData.elimination_top || scoreData.elimination_bottom ||
-          scoreData.lck_winner) && (
-          <div className="absolute z-10 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 left-1/2 transform -translate-x-1/2 mt-1 min-w-max whitespace-nowrap">
-            <div className="text-left">
-              {scoreData.quickfire_winner && <div>Quickfire Winner (+3)</div>}
-              {scoreData.quickfire_top && <div>Quickfire Top (+1)</div>}
-              {scoreData.quickfire_bottom && <div>Quickfire Bottom (-1)</div>}
-              {scoreData.elimination_winner && <div>Elimination Winner (+5)</div>}
-              {scoreData.elimination_top && <div>Elimination Top (+1)</div>}
-              {scoreData.elimination_bottom && <div>Elimination Bottom (-1)</div>}
-              {scoreData.lck_winner && <div>Last Chance Kitchen Winner (+1)</div>}
-            </div>
+      )}
+
+      {/* Tooltip (remains unchanged) */}
+      {(scoreData.quickfire_winner || scoreData.quickfire_top || scoreData.quickfire_bottom ||
+        scoreData.elimination_winner || scoreData.elimination_top || scoreData.elimination_bottom ||
+        scoreData.lck_winner) && (
+        <div className="absolute z-10 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 left-1/2 transform -translate-x-1/2 mt-1 min-w-max whitespace-nowrap">
+          <div className="text-left">
+            {scoreData.quickfire_winner && <div>Quickfire Winner (+3)</div>}
+            {scoreData.quickfire_top && <div>Quickfire Top (+1)</div>}
+            {scoreData.quickfire_bottom && <div>Quickfire Bottom (-1)</div>}
+            {scoreData.elimination_winner && <div>Elimination Winner (+5)</div>}
+            {scoreData.elimination_top && <div>Elimination Top (+1)</div>}
+            {scoreData.elimination_bottom && <div>Elimination Bottom (-1)</div>}
+            {scoreData.lck_winner && <div>Last Chance Kitchen Winner (+1)</div>}
           </div>
-        )}
-      </td>
+        </div>
+      )}
+    </td>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <Link href="/" className="text-blue-600 hover:underline">← Back to Standings</Link>
-          <h1 className="text-3xl font-bold text-center">Chef Performance By Episode</h1>
-          <div className="w-20"></div> {/* Empty div for balance */}
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex justify-between items-center mb-6">
+          <Link href="/" className="text-blue-500 hover:text-blue-700 transition duration-300">
+            ← Back to Standings
+          </Link>
+          <h1 className="text-2xl sm:text-3xl font-bold text-center">Chef Performance By Episode</h1>
+          <div className="w-20"></div> {/* Empty div for balance - consider removing if not needed */}
         </div>
-        
-        <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
+
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full table-auto">
-              <thead>
-                <tr className="bg-gray-100 text-gray-700">
-                  <th className="px-4 py-3 text-left">
-                    <button 
-                      onClick={() => setSortBy('name')} 
-                      className={`font-medium ${sortBy === 'name' ? 'text-blue-600' : ''}`}
+            <table className="min-w-full divide-y divide-gray-300">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <button
+                      onClick={() => setSortBy('name')}
+                      className={`flex items-center focus:outline-none ${sortBy === 'name' ? 'text-blue-600' : 'hover:text-blue-500'}`}
                     >
                       Chef Name
+                      {sortBy === 'name' && (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                        </svg>
+                      )}
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-center">
-                    <button 
-                      onClick={() => setSortBy('status')} 
-                      className={`font-medium ${sortBy === 'status' ? 'text-blue-600' : ''}`}
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <button
+                      onClick={() => setSortBy('status')}
+                      className={`flex items-center justify-center focus:outline-none ${sortBy === 'status' ? 'text-blue-600' : 'hover:text-blue-500'}`}
                     >
                       Status
+                      {sortBy === 'status' && (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                        </svg>
+                      )}
                     </button>
                   </th>
                   {episodes.map((episode, i) => (
-                    <th key={episode.id} className="px-4 py-3 text-center">
-                      <button 
-                        onClick={() => setSortBy(`episode-${i}`)} 
-                        className={`font-medium ${sortBy === `episode-${i}` ? 'text-blue-600' : ''}`}
+                    <th key={episode.id} className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <button
+                        onClick={() => setSortBy(`episode-${i}`)}
+                        className={`focus:outline-none ${sortBy === `episode-${i}` ? 'text-blue-600' : 'hover:text-blue-500'}`}
                       >
                         Ep {episode.episode_number}
+                        {sortBy === `episode-${i}` && (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                          </svg>
+                        )}
                       </button>
                     </th>
                   ))}
-                  <th className="px-4 py-3 text-center">
-                    <button 
-                      onClick={() => setSortBy('totalPoints')} 
-                      className={`font-medium ${sortBy === 'totalPoints' ? 'text-blue-600' : ''}`}
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <button
+                      onClick={() => setSortBy('totalPoints')}
+                        className={`flex items-center justify-center focus:outline-none ${sortBy === 'totalPoints' ? 'text-blue-600' : 'hover:text-blue-500'}`}
                     >
                       Total
+                      {sortBy === 'totalPoints' && (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                        </svg>
+                      )}
                     </button>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-gray-200">
                 {sortedChefs.map((chef) => (
-                  <tr 
-                    key={chef.id} 
-                    className={`hover:bg-gray-50 ${chef.status === 'eliminated' ? 'text-gray-400' : ''}`}
+                  <tr
+                    key={chef.id}
+                    className={`transition duration-300 ease-in-out hover:bg-gray-50 ${chef.status === 'eliminated' ? 'text-gray-400' : ''}`}
                   >
-                    <td className="px-4 py-3 font-medium">{chef.name}</td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">{chef.name}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
                       <ChefStatus status={chef.status} />
                     </td>
                     {chef.scores.map((_, i) => renderScoreCell(chef, i))}
-                    <td className="px-4 py-3 text-center font-bold">{chef.totalPoints}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-center font-bold">{chef.totalPoints}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
-        
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Scoring Guide</h2>
+
+        <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">Scoring Guide</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <h3 className="font-medium mb-2">Chef Status</h3>
-              <ul className="space-y-2">
-                <li className="flex items-center">
+              <h3 className="font-medium text-gray-600 mb-2">Chef Status</h3>
+              <div className="space-y-2">
+                <div className="flex items-center">
                   <ChefStatus status="active" />
-                  <span className="ml-2">Active in competition</span>
-                </li>
-                <li className="flex items-center">
+                  <span className="ml-2 text-sm text-gray-500">Active in competition</span>
+                </div>
+                <div className="flex items-center">
                   <ChefStatus status="lck" />
-                  <span className="ml-2">In Last Chance Kitchen</span>
-                </li>
-                <li className="flex items-center">
+                  <span className="ml-2 text-sm text-gray-500">In Last Chance Kitchen</span>
+                </div>
+                <div className="flex items-center">
                   <ChefStatus status="eliminated" />
-                  <span className="ml-2">Eliminated</span>
-                </li>
-              </ul>
+                  <span className="ml-2 text-sm text-gray-500">Eliminated</span>
+                </div>
+              </div>
             </div>
             <div>
-              <h3 className="font-medium mb-2">Quickfire Challenges</h3>
-              <ul className="list-disc pl-5 space-y-1">
+              <h3 className="font-medium text-gray-600 mb-2">Quickfire Challenges</h3>
+              <ul className="list-disc pl-5 space-y-1 text-sm text-gray-500">
                 <li>Winner: +3 points 🔥</li>
                 <li>Top section: +1 point</li>
                 <li>Bottom section: -1 point</li>
               </ul>
-              
-              <h3 className="font-medium mb-2 mt-4">Last Chance Kitchen</h3>
-              <ul className="list-disc pl-5 space-y-1">
+
+              <h3 className="font-medium text-gray-600 mb-2 mt-4">Last Chance Kitchen</h3>
+              <ul className="list-disc pl-5 space-y-1 text-sm text-gray-500">
                 <li>Winner: +1 point 🔄</li>
               </ul>
             </div>
             <div>
-              <h3 className="font-medium mb-2">Elimination Challenges</h3>
-              <ul className="list-disc pl-5 space-y-1">
+              <h3 className="font-medium text-gray-600 mb-2">Elimination Challenges</h3>
+              <ul className="list-disc pl-5 space-y-1 text-sm text-gray-500">
                 <li>Winner: +5 points 🏆</li>
                 <li>Top section: +1 point</li>
                 <li>Bottom section: -1 point</li>
