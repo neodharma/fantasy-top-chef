@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { supabase } from '../lib/supabase';
+import ChefStatus from '../components/ChefStatus';
 
 const HomePage = () => {
   const [teams, setTeams] = useState([]);
@@ -149,15 +150,7 @@ const HomePage = () => {
                           <tr key={chef.id}>
                             <td className="px-3 py-2 border border-gray-300 font-medium">{chef.name}</td>
                             <td className="px-3 py-2 text-center border border-gray-300">
-                              {chef.eliminated ? (
-                                <span className="inline-block px-1 py-0 bg-red-100 text-red-800 rounded-full text-xs">
-                                  Eliminated
-                                </span>
-                              ) : (
-                                <span className="inline-block px-1 py-0 bg-green-100 text-green-800 rounded-full text-xs">
-                                  Active
-                                </span>
-                              )}
+                              <ChefStatus status={chef.status || (chef.eliminated ? 'eliminated' : 'active')} />
                             </td>
                             <td className="px-3 py-2 text-center border border-gray-300 font-medium">{chef.totalPoints}</td>
                           </tr>
@@ -181,7 +174,23 @@ const HomePage = () => {
           ))}
         </div>
         
-        {/* Footer content removed as requested */}
+        <div className="mt-8 bg-white p-4 rounded-lg shadow">
+          <h2 className="text-lg font-semibold mb-3">Status Legend</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="flex items-center">
+              <ChefStatus status="active" />
+              <span className="ml-2">Active in main competition</span>
+            </div>
+            <div className="flex items-center">
+              <ChefStatus status="lck" />
+              <span className="ml-2">In Last Chance Kitchen</span>
+            </div>
+            <div className="flex items-center">
+              <ChefStatus status="eliminated" />
+              <span className="ml-2">Eliminated from competition</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '../lib/supabase';
+import ChefStatus from '../components/ChefStatus';
 
 const ChefScoresPage = () => {
   const [chefData, setChefData] = useState([]);
@@ -71,9 +72,7 @@ const ChefScoresPage = () => {
           return {
             id: chef.id,
             name: chef.name,
-            eliminated: chef.eliminated,
-            in_finale: chef.in_finale,
-            is_winner: chef.is_winner,
+            status: chef.status || (chef.eliminated ? 'eliminated' : 'active'), // Convert eliminated flag to status if needed
             scores: episodeScores,
             totalPoints
           };
@@ -97,6 +96,10 @@ const ChefScoresPage = () => {
       return b.totalPoints - a.totalPoints;
     } else if (sortBy === 'name') {
       return a.name.localeCompare(b.name);
+    } else if (sortBy === 'status') {
+      // Sort by status priority: active, lck, eliminated
+      const statusPriority = { 'active': 0, 'lck': 1, 'eliminated': 2 };
+      return statusPriority[a.status || 'active'] - statusPriority[b.status || 'active'];
     } else if (sortBy.startsWith('episode-')) {
       const episodeIndex = parseInt(sortBy.split('-')[1]);
       return b.scores[episodeIndex].score - a.scores[episodeIndex].score;
@@ -152,8 +155,6 @@ const ChefScoresPage = () => {
               {scoreData.elimination_winner && <div>Elimination Winner (+5)</div>}
               {scoreData.elimination_top && <div>Elimination Top (+1)</div>}
               {scoreData.elimination_bottom && <div>Elimination Bottom (-1)</div>}
-              {chef.in_finale && episodes[episodeIndex].is_finale && <div>In Finale (+5)</div>}
-              {chef.is_winner && episodes[episodeIndex].is_finale && <div>Season Winner (+10)</div>}
             </div>
           </div>
         )}
@@ -183,6 +184,14 @@ const ChefScoresPage = () => {
                       Chef Name
                     </button>
                   </th>
+                  <th className="px-4 py-3 text-center">
+                    <button 
+                      onClick={() => setSortBy('status')} 
+                      className={`font-medium ${sortBy === 'status' ? 'text-blue-600' : ''}`}
+                    >
+                      Status
+                    </button>
+                  </th>
                   {episodes.map((episode, i) => (
                     <th key={episode.id} className="px-4 py-3 text-center">
                       <button 
@@ -207,13 +216,11 @@ const ChefScoresPage = () => {
                 {sortedChefs.map((chef) => (
                   <tr 
                     key={chef.id} 
-                    className={`hover:bg-gray-50 ${chef.eliminated ? 'text-gray-400' : ''} ${chef.is_winner ? 'bg-yellow-50 font-medium' : ''}`}
+                    className={`hover:bg-gray-50 ${chef.status === 'eliminated' ? 'text-gray-400' : ''}`}
                   >
-                    <td className="px-4 py-3 font-medium">
-                      {chef.name}
-                      {chef.is_winner && <span className="ml-2 text-yellow-600 text-sm">(Winner)</span>}
-                      {chef.eliminated && !chef.is_winner && <span className="ml-2 text-gray-500 text-sm">(Eliminated)</span>}
-                      {chef.in_finale && !chef.is_winner && !chef.eliminated && <span className="ml-2 text-blue-500 text-sm">(Finalist)</span>}
+                    <td className="px-4 py-3 font-medium">{chef.name}</td>
+                    <td className="px-4 py-3 text-center">
+                      <ChefStatus status={chef.status} />
                     </td>
                     {chef.scores.map((_, i) => renderScoreCell(chef, i))}
                     <td className="px-4 py-3 text-center font-bold">{chef.totalPoints}</td>
@@ -226,7 +233,24 @@ const ChefScoresPage = () => {
         
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Scoring Guide</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <h3 className="font-medium mb-2">Chef Status</h3>
+              <ul className="space-y-2">
+                <li className="flex items-center">
+                  <ChefStatus status="active" />
+                  <span className="ml-2">Active in competition</span>
+                </li>
+                <li className="flex items-center">
+                  <ChefStatus status="lck" />
+                  <span className="ml-2">In Last Chance Kitchen</span>
+                </li>
+                <li className="flex items-center">
+                  <ChefStatus status="eliminated" />
+                  <span className="ml-2">Eliminated</span>
+                </li>
+              </ul>
+            </div>
             <div>
               <h3 className="font-medium mb-2">Quickfire Challenges</h3>
               <ul className="list-disc pl-5 space-y-1">
@@ -241,13 +265,6 @@ const ChefScoresPage = () => {
                 <li>Winner: +5 points 🏆</li>
                 <li>Top section: +1 point</li>
                 <li>Bottom section: -1 point</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-medium mb-2">Finale Bonuses</h3>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Making it to finale: +5 points</li>
-                <li>Top Chef Winner: +10 points</li>
               </ul>
             </div>
           </div>
