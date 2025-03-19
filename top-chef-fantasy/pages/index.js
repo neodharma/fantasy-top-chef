@@ -159,15 +159,14 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-gray-100 py-3 px-3">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl font-bold text-center mb-1">Top Chef Fantasy League</h1>
-        <p className="text-center text-gray-600 mb-2 text-sm">Season 21 - Current Standings</p>
-        
+        <p className="text-center text-gray-700 mb-2 text-sm">Season 1 (well, 22) - Current Standings</p>
+
         <div className="text-center mb-3">
-          <Link href="/chef-scores" className="text-blue-600 hover:underline text-sm">
+          <Link href="/chef-scores" className="text-blue-500 hover:underline text-sm">
             View Chef Performance By Episode →
           </Link>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {teams.map((team, index) => {
             const colorScheme = getTeamColorScheme(team.id);
@@ -187,12 +186,12 @@ const HomePage = () => {
                 </CardHeader>
                 <CardContent className="p-2 pt-0">
                   <div className="overflow-x-auto">
-                    <table className="min-w-full border-collapse bg-white">
+                    <table className="min-w-full table-fixed border-collapse bg-white">
                       <thead>
                         <tr>
-                          <th className="px-2 py-1 text-left border border-gray-200 font-medium text-gray-700 bg-gray-50 text-sm">Chef</th>
-                          <th className="px-2 py-1 text-center border border-gray-200 font-medium text-gray-700 bg-gray-50 text-sm">Status</th>
-                          <th className="px-2 py-1 text-center border border-gray-200 font-medium text-gray-700 bg-gray-50 text-sm">Points</th>
+                          <th className="w-1/2 px-2 py-1 text-left border border-gray-200 font-medium text-gray-700 bg-gray-50 text-sm">Chef</th>
+                          <th className="w-1/4 px-2 py-1 text-center border border-gray-200 font-medium text-gray-700 bg-gray-50 text-sm">Status</th>
+                          <th className="w-1/4 px-2 py-1 text-right border border-gray-200 font-medium text-gray-700 bg-gray-50 text-sm">Points</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -211,7 +210,7 @@ const HomePage = () => {
                                   </span>
                                 )}
                               </td>
-                              <td className="px-2 py-1 text-center border border-gray-200 font-medium text-sm">{chef.totalPoints}</td>
+                              <td className="px-2 py-1 text-right border border-gray-200 font-medium text-sm">{chef.totalPoints}</td>
                             </tr>
                           ))
                         ) : (
@@ -223,7 +222,7 @@ const HomePage = () => {
                         )}
                         <tr className="bg-gray-50">
                           <td colSpan="2" className={`px-2 py-1 border border-gray-200 text-right font-bold ${colorScheme.accentText} text-sm`}>Team Total:</td>
-                          <td className={`px-2 py-1 text-center border border-gray-200 font-bold ${colorScheme.accentText} text-sm`}>{team.totalPoints}</td>
+                          <td className={`px-2 py-1 text-right border border-gray-200 font-bold ${colorScheme.accentText} text-sm`}>{team.totalPoints}</td>
                         </tr>
                       </tbody>
                     </table>

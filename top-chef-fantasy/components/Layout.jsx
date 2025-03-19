@@ -5,10 +5,10 @@ import Link from 'next/link';
 const Layout = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-indigo-700 text-white shadow-md">
+      <header className="bg-[#4e2773] text-white shadow-md">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link href="/" className="text-2xl font-bold">
-            Top Chef Fantasy
+            Ben's Top Chef Fantasy league
           </Link>
           <nav>
             <ul className="flex space-x-6">
@@ -19,7 +19,7 @@ const Layout = ({ children }) => {
               </li>
               <li>
                 <Link href="/chef-scores" className="hover:text-indigo-200 transition-colors">
-                  Chef Scores
+                  Scores by Episode
                 </Link>
               </li>
               <li>
