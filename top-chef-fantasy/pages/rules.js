@@ -79,6 +79,10 @@ const RulesPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-gray-900">Special Challenge Winner</td>
                       <td className="px-6 py-4 whitespace-nowrap text-center font-medium text-green-600">+7</td>
                     </tr>
+                    <tr className="bg-white">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">Last Chance Kitchen Winner</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center font-medium text-green-600">+1</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>

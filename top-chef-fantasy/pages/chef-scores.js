@@ -62,7 +62,8 @@ const ChefScoresPage = () => {
               quickfire_bottom: scoreEntry ? scoreEntry.quickfire_bottom : false,
               elimination_winner: scoreEntry ? scoreEntry.elimination_winner : false,
               elimination_top: scoreEntry ? scoreEntry.elimination_top : false,
-              elimination_bottom: scoreEntry ? scoreEntry.elimination_bottom : false
+              elimination_bottom: scoreEntry ? scoreEntry.elimination_bottom : false,
+              lck_winner: scoreEntry ? scoreEntry.lck_winner : false
             };
           });
           
@@ -138,6 +139,7 @@ const ChefScoresPage = () => {
     const icons = [];
     if (scoreData.quickfire_winner) icons.push('🔥'); // Quickfire winner
     if (scoreData.elimination_winner) icons.push('🏆'); // Elimination winner
+    if (scoreData.lck_winner) icons.push('🔄'); // Last Chance Kitchen winner
     
     return (
       <td key={episodeIndex} className="px-4 py-3 text-center group relative">
@@ -152,7 +154,8 @@ const ChefScoresPage = () => {
         
         {/* Tooltip with details */}
         {(scoreData.quickfire_winner || scoreData.quickfire_top || scoreData.quickfire_bottom || 
-          scoreData.elimination_winner || scoreData.elimination_top || scoreData.elimination_bottom) && (
+          scoreData.elimination_winner || scoreData.elimination_top || scoreData.elimination_bottom ||
+          scoreData.lck_winner) && (
           <div className="absolute z-10 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 left-1/2 transform -translate-x-1/2 mt-1 min-w-max whitespace-nowrap">
             <div className="text-left">
               {scoreData.quickfire_winner && <div>Quickfire Winner (+3)</div>}
@@ -161,6 +164,7 @@ const ChefScoresPage = () => {
               {scoreData.elimination_winner && <div>Elimination Winner (+5)</div>}
               {scoreData.elimination_top && <div>Elimination Top (+1)</div>}
               {scoreData.elimination_bottom && <div>Elimination Bottom (-1)</div>}
+              {scoreData.lck_winner && <div>Last Chance Kitchen Winner (+1)</div>}
             </div>
           </div>
         )}
@@ -263,6 +267,11 @@ const ChefScoresPage = () => {
                 <li>Winner: +3 points 🔥</li>
                 <li>Top section: +1 point</li>
                 <li>Bottom section: -1 point</li>
+              </ul>
+              
+              <h3 className="font-medium mb-2 mt-4">Last Chance Kitchen</h3>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Winner: +1 point 🔄</li>
               </ul>
             </div>
             <div>
