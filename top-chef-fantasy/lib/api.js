@@ -1,6 +1,7 @@
+// lib/api.js
 import { supabase } from './supabase'
 
-// Get all teams with their chefs
+// Get all teams with their chefs and calculated scores
 export async function getTeams() {
   // Get teams
   const { data: teams, error: teamsError } = await supabase
@@ -49,7 +50,7 @@ export async function getTeams() {
         return { ...team, chefs: chefs, totalPoints: 0 }
       }
       
-      const totalPoints = scores.reduce((sum, scoreObj) => sum + scoreObj.score, 0)
+      const totalPoints = scores ? scores.reduce((sum, scoreObj) => sum + scoreObj.score, 0) : 0
       
       return {
         ...team,
@@ -62,61 +63,57 @@ export async function getTeams() {
   return teamsWithChefs
 }
 
-// Get all chef scores by episode
+// Get all chef scores by episode directly from the chef_scores table
 export async function getChefScores() {
-  // Get all chefs
-  const { data: chefs, error: chefsError } = await supabase
-    .from('chefs')
-    .select('*')
-    .eq('current_season', true)
-  
-  if (chefsError) {
-    console.error('Error fetching chefs:', chefsError)
-    return []
-  }
-  
-  // Get all episodes
-  const { data: episodes, error: episodesError } = await supabase
-    .from('episodes')
-    .select('*')
-    .order('episode_number', { ascending: true })
-  
-  if (episodesError) {
-    console.error('Error fetching episodes:', episodesError)
-    return []
-  }
-  
-  // For each chef, get their scores for each episode
-  const chefsWithScores = await Promise.all(
-    chefs.map(async (chef) => {
-      const { data: scores, error: scoresError } = await supabase
-        .from('chef_scores')
-        .select('*, episodes!inner(*)')
-        .eq('chef_id', chef.id)
-      
-      if (scoresError) {
-        console.error(`Error fetching scores for chef ${chef.id}:`, scoresError)
-        return {
-          id: chef.id,
-          name: chef.name,
-          scores: Array(episodes.length).fill(0)
-        }
-      }
-      
-      // Map scores to episodes
-      const episodeScores = episodes.map((episode) => {
-        const scoreObj = scores.find(s => s.episodes.id === episode.id)
-        return scoreObj ? scoreObj.score : 0
-      })
+  try {
+    // Get all episodes
+    const { data: episodes, error: episodesError } = await supabase
+      .from('episodes')
+      .select('*')
+      .order('episode_number', { ascending: true });
+    
+    if (episodesError) throw episodesError;
+    
+    // Get all chefs
+    const { data: chefs, error: chefsError } = await supabase
+      .from('chefs')
+      .select('*')
+      .order('name');
+    
+    if (chefsError) throw chefsError;
+    
+    // Get all scores
+    const { data: scores, error: scoresError } = await supabase
+      .from('chef_scores')
+      .select('*');
+    
+    if (scoresError) throw scoresError;
+    
+    // Process chefs with their scores
+    const chefsWithScores = chefs.map(chef => {
+      // Map chef scores to episodes
+      const episodeScores = episodes.map(episode => {
+        const scoreEntry = scores.find(
+          s => s.chef_id === chef.id && s.episode_id === episode.id
+        ) || { score: 0 };
+        
+        return scoreEntry.score;
+      });
       
       return {
         id: chef.id,
         name: chef.name,
+        eliminated: chef.eliminated,
+        in_finale: chef.in_finale,
+        is_winner: chef.is_winner,
         scores: episodeScores,
         totalPoints: episodeScores.reduce((sum, score) => sum + score, 0)
-      }
-    })
-  )
-  
-  return { chefs: chefsWithScores, episodes }
+      };
+    });
+    
+    return { chefs: chefsWithScores, episodes };
+  } catch (error) {
+    console.error('Error fetching chef scores:', error);
+    return { chefs: [], episodes: [] };
+  }
 }
