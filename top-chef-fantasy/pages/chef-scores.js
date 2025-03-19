@@ -7,7 +7,7 @@ const ChefScoresPage = () => {
   const [chefData, setChefData] = useState([]);
   const [episodes, setEpisodes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('totalPoints');
+  const [sortBy, setSortBy] = useState('status');
   const [showDetails, setShowDetails] = useState(false);
   
   useEffect(() => {
@@ -97,9 +97,15 @@ const ChefScoresPage = () => {
     } else if (sortBy === 'name') {
       return a.name.localeCompare(b.name);
     } else if (sortBy === 'status') {
-      // Sort by status priority: active, lck, eliminated
+      // First sort by status priority: active, lck, eliminated
       const statusPriority = { 'active': 0, 'lck': 1, 'eliminated': 2 };
-      return statusPriority[a.status || 'active'] - statusPriority[b.status || 'active'];
+      const statusCompare = statusPriority[a.status || 'active'] - statusPriority[b.status || 'active'];
+      
+      // If status is the same, sort by total points (highest first)
+      if (statusCompare === 0) {
+        return b.totalPoints - a.totalPoints;
+      }
+      return statusCompare;
     } else if (sortBy.startsWith('episode-')) {
       const episodeIndex = parseInt(sortBy.split('-')[1]);
       return b.scores[episodeIndex].score - a.scores[episodeIndex].score;

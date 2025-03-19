@@ -3,7 +3,56 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { supabase } from '../lib/supabase';
-import ChefStatus from '../components/ChefStatus';
+
+// Array of pastel color schemes for teams
+const pastelColors = [
+  {
+    textColor: "text-sky-600",
+    accentText: "text-sky-700",
+    border: "border-sky-100"
+  },
+  {
+    textColor: "text-blue-600",
+    accentText: "text-blue-700",
+    border: "border-blue-100"
+  },
+  {
+    textColor: "text-emerald-600",
+    accentText: "text-emerald-700",
+    border: "border-emerald-100"
+  },
+  {
+    textColor: "text-purple-600",
+    accentText: "text-purple-700",
+    border: "border-purple-100"
+  },
+  {
+    textColor: "text-amber-600",
+    accentText: "text-amber-700",
+    border: "border-amber-100"
+  },
+  {
+    textColor: "text-pink-600",
+    accentText: "text-pink-700",
+    border: "border-pink-100"
+  },
+  {
+    textColor: "text-teal-600",
+    accentText: "text-teal-700",
+    border: "border-teal-100"
+  },
+  {
+    textColor: "text-indigo-600",
+    accentText: "text-indigo-700",
+    border: "border-indigo-100"
+  }
+];
+
+// Function to get a color scheme based on team ID
+const getTeamColorScheme = (teamId) => {
+  const colorIndex = (teamId - 1) % pastelColors.length;
+  return pastelColors[colorIndex];
+};
 
 const HomePage = () => {
   const [teams, setTeams] = useState([]);
@@ -108,88 +157,81 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-4 px-4">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-1">Top Chef Fantasy League</h1>
-        <p className="text-center text-gray-600 mb-2">Season 21 - Current Standings</p>
+    <div className="min-h-screen bg-gray-100 py-3 px-3">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-2xl font-bold text-center mb-1">Top Chef Fantasy League</h1>
+        <p className="text-center text-gray-600 mb-2 text-sm">Season 21 - Current Standings</p>
         
-        <div className="text-center mb-4">
-          <Link href="/chef-scores" className="text-blue-600 hover:underline">
+        <div className="text-center mb-3">
+          <Link href="/chef-scores" className="text-blue-600 hover:underline text-sm">
             View Chef Performance By Episode →
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 gap-4">
-          {teams.map((team, index) => (
-            <Card key={team.id} className={index === 0 ? "border-2 border-yellow-400" : ""}>
-              <CardHeader className="pb-2 px-4 py-3">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle className="text-lg">{team.name}</CardTitle>
-                    <p className="text-xs text-gray-500">Owner: {team.owner}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {teams.map((team, index) => {
+            const colorScheme = getTeamColorScheme(team.id);
+            return (
+              <Card key={team.id} className={`${index === 0 ? "border-2 border-yellow-400" : "border border-gray-200"} shadow-sm bg-white`}>
+                <CardHeader className="pb-0 px-3 py-2 bg-white">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle className={`text-base ${colorScheme.textColor}`}>{team.name}</CardTitle>
+                      <p className="text-xs text-gray-500">Owner: {team.owner}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className={`text-lg font-bold ${colorScheme.textColor}`}>{team.totalPoints} pts</span>
+                      <p className="text-xs text-gray-500">Rank: #{index + 1}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-xl font-bold">{team.totalPoints} pts</span>
-                    <p className="text-xs text-gray-500">Rank: #{index + 1}</p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-3 pt-0">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full border-collapse">
-                    <thead>
-                      <tr>
-                        <th className="px-3 py-2 text-left border border-gray-300 font-medium text-gray-700 bg-white">Chef</th>
-                        <th className="px-3 py-2 text-center border border-gray-300 font-medium text-gray-700 bg-white">Status</th>
-                        <th className="px-3 py-2 text-center border border-gray-300 font-medium text-gray-700 bg-white">Points</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {team.chefs.length > 0 ? (
-                        team.chefs.map((chef) => (
-                          <tr key={chef.id}>
-                            <td className="px-3 py-2 border border-gray-300 font-medium">{chef.name}</td>
-                            <td className="px-3 py-2 text-center border border-gray-300">
-                              <ChefStatus status={chef.status || (chef.eliminated ? 'eliminated' : 'active')} />
-                            </td>
-                            <td className="px-3 py-2 text-center border border-gray-300 font-medium">{chef.totalPoints}</td>
-                          </tr>
-                        ))
-                      ) : (
+                </CardHeader>
+                <CardContent className="p-2 pt-0">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full border-collapse bg-white">
+                      <thead>
                         <tr>
-                          <td colSpan="3" className="px-3 py-2 border border-gray-300 text-center text-gray-500 italic">
-                            No chefs on team roster
-                          </td>
+                          <th className="px-2 py-1 text-left border border-gray-200 font-medium text-gray-700 bg-gray-50 text-sm">Chef</th>
+                          <th className="px-2 py-1 text-center border border-gray-200 font-medium text-gray-700 bg-gray-50 text-sm">Status</th>
+                          <th className="px-2 py-1 text-center border border-gray-200 font-medium text-gray-700 bg-gray-50 text-sm">Points</th>
                         </tr>
-                      )}
-                      <tr className="bg-gray-100">
-                        <td colSpan="2" className="px-3 py-2 border border-gray-300 text-right font-bold">Team Total:</td>
-                        <td className="px-3 py-2 text-center border border-gray-300 font-bold">{team.totalPoints}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        
-        <div className="mt-8 bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-3">Status Legend</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <div className="flex items-center">
-              <ChefStatus status="active" />
-              <span className="ml-2">Active in main competition</span>
-            </div>
-            <div className="flex items-center">
-              <ChefStatus status="lck" />
-              <span className="ml-2">In Last Chance Kitchen</span>
-            </div>
-            <div className="flex items-center">
-              <ChefStatus status="eliminated" />
-              <span className="ml-2">Eliminated from competition</span>
-            </div>
-          </div>
+                      </thead>
+                      <tbody>
+                        {team.chefs.length > 0 ? (
+                          team.chefs.map((chef) => (
+                            <tr key={chef.id}>
+                              <td className="px-2 py-1 border border-gray-200 font-medium text-sm">{chef.name}</td>
+                              <td className="px-2 py-1 text-center border border-gray-200">
+                                {chef.eliminated ? (
+                                  <span className="inline-block px-1 bg-red-100 text-red-800 rounded-full text-xs">
+                                    Eliminated
+                                  </span>
+                                ) : (
+                                  <span className="inline-block px-1 bg-green-100 text-green-800 rounded-full text-xs">
+                                    Active
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-2 py-1 text-center border border-gray-200 font-medium text-sm">{chef.totalPoints}</td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="3" className="px-2 py-1 border border-gray-200 text-center text-gray-500 italic text-sm">
+                              No chefs on team roster
+                            </td>
+                          </tr>
+                        )}
+                        <tr className="bg-gray-50">
+                          <td colSpan="2" className={`px-2 py-1 border border-gray-200 text-right font-bold ${colorScheme.accentText} text-sm`}>Team Total:</td>
+                          <td className={`px-2 py-1 text-center border border-gray-200 font-bold ${colorScheme.accentText} text-sm`}>{team.totalPoints}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>
