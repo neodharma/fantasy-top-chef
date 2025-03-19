@@ -9,90 +9,98 @@ const ChefScoresPage = () => {
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('status');
   const [showDetails, setShowDetails] = useState(false);
-  
+
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      
+
       try {
-        // Fetch all episodes
+        // Fetch episodes (this part is fine as is)
         const { data: episodesData, error: episodesError } = await supabase
           .from('episodes')
           .select('*')
           .order('episode_number', { ascending: true });
-        
+
         if (episodesError) {
           console.error('Error fetching episodes:', episodesError);
           return;
         }
-        
-        // Fetch all chefs
+        setEpisodes(episodesData);  // Set episodes here, before the main query
+
+
+        // Fetch chefs WITH their scores, joined and filtered
         const { data: chefsData, error: chefsError } = await supabase
           .from('chefs')
-          .select('*')
-          .order('name');
-        
+          .select(`
+            id,
+            name,
+            status,
+            chef_scores!left(
+              episode_id,
+              score,
+              quickfire_winner,
+              quickfire_top,
+              quickfire_bottom,
+              elimination_winner,
+              elimination_top,
+              elimination_bottom,
+              lck_winner
+            )
+          `)
+          .order('name');  // Order by name initially
+
         if (chefsError) {
-          console.error('Error fetching chefs:', chefsError);
+          console.error('Error fetching chefs with scores:', chefsError);
           return;
         }
-        
-        // Fetch all scores
-        const { data: scoresData, error: scoresError } = await supabase
-          .from('chef_scores')
-          .select('*');
-        
-        if (scoresError) {
-          console.error('Error fetching scores:', scoresError);
-          return;
-        }
-        
-        // Process chef data with their scores
+
+        // Process the joined data
         const processedChefData = chefsData.map(chef => {
-          // Get this chef's scores for each episode
           const episodeScores = episodesData.map(episode => {
-            const scoreEntry = scoresData.find(
-              score => score.chef_id === chef.id && score.episode_id === episode.id
-            );
-            
+            // Find the score entry for THIS episode.  Crucially, the join
+            // already handles matching chefs and scores.
+            const scoreEntry = chef.chef_scores.find(score => score.episode_id === episode.id);
+
+            // Return score data, handling the case where there's NO score entry.
             return {
-              score: scoreEntry ? scoreEntry.score : 0,
+              score: scoreEntry ? scoreEntry.score : null, // Use null for missing scores
               quickfire_winner: scoreEntry ? scoreEntry.quickfire_winner : false,
               quickfire_top: scoreEntry ? scoreEntry.quickfire_top : false,
               quickfire_bottom: scoreEntry ? scoreEntry.quickfire_bottom : false,
               elimination_winner: scoreEntry ? scoreEntry.elimination_winner : false,
               elimination_top: scoreEntry ? scoreEntry.elimination_top : false,
               elimination_bottom: scoreEntry ? scoreEntry.elimination_bottom : false,
-              lck_winner: scoreEntry ? scoreEntry.lck_winner : false
+              lck_winner: scoreEntry ? scoreEntry.lck_winner : false,
             };
           });
-          
-          // Calculate total points
-          const totalPoints = episodeScores.reduce((sum, entry) => sum + entry.score, 0);
-          
+
+          // Calculate total points, handling null scores correctly.
+          const totalPoints = episodeScores.reduce((sum, entry) => {
+            return sum + (entry.score === null ? 0 : entry.score);
+          }, 0);
+
           return {
             id: chef.id,
             name: chef.name,
-            status: chef.status || (chef.eliminated ? 'eliminated' : 'active'), // Convert eliminated flag to status if needed
+            status: chef.status,
             scores: episodeScores,
-            totalPoints
+            totalPoints,
           };
         });
-        
-        setEpisodes(episodesData);
+
         setChefData(processedChefData);
+
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     }
-    
+
     fetchData();
   }, []);
-  
-  // Sort chefs based on selected criteria
-  const sortedChefs = [...chefData].sort((a, b) => {
+    //Sort logic and return rendering stay the same, with a minor change
+      const sortedChefs = [...chefData].sort((a, b) => {
     if (sortBy === 'totalPoints') {
       return b.totalPoints - a.totalPoints;
     } else if (sortBy === 'name') {
@@ -108,24 +116,20 @@ const ChefScoresPage = () => {
       }
       return statusCompare;
     } else if (sortBy.startsWith('episode-')) {
-      const episodeIndex = parseInt(sortBy.split('-')[1]);
-      return b.scores[episodeIndex].score - a.scores[episodeIndex].score;
+        const episodeIndex = parseInt(sortBy.split('-')[1]);
+        //THIS IS IMPORTANT: if one of the chefs doesn't have a score for that episode, sort them to the bottom
+        const scoreA = a.scores[episodeIndex].score === null ? -Infinity : a.scores[episodeIndex].score;
+        const scoreB = b.scores[episodeIndex].score === null ? -Infinity : b.scores[episodeIndex].score;
+      return scoreB - scoreA;
     }
     return 0;
   });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-xl">Loading chef scores...</p>
-      </div>
-    );
-  }
-
-  // Function to render score cell with icons for performance
-  const renderScoreCell = (chef, episodeIndex) => {
+//in renderScoreCell, check for a null score before assigning a color
+const renderScoreCell = (chef, episodeIndex) => {
     const scoreData = chef.scores[episodeIndex];
-    const score = scoreData.score;
+    //Handle null scores.
+    const score = scoreData.score === null ? '-' : scoreData.score; //display '-' for null
     
     // Determine cell background color based on score
     let bgColor = '';
@@ -133,7 +137,8 @@ const ChefScoresPage = () => {
     else if (score >= 3) bgColor = 'bg-green-50 text-green-700';
     else if (score <= -3) bgColor = 'bg-red-100 text-red-800';
     else if (score < 0) bgColor = 'bg-red-50 text-red-700';
-    else bgColor = 'bg-gray-100';
+    else bgColor = 'bg-gray-100'; // Default for 0 or null
+
     
     // Create icons for different statuses
     const icons = [];
