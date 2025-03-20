@@ -67,7 +67,7 @@ const RulesPage = () => {
                 </table>
               </div>
               <p className="mt-4 text-sm text-gray-600">
-                <b>I'll try to update this as soon as I can on Fridays after I watch the episode!</b>
+                <b>I will try to update this as soon as I can on Fridays after I watch the episode!</b>
               </p>
             </section>
             
