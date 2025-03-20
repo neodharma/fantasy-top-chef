@@ -8,7 +8,7 @@ const Layout = ({ children }) => {
       <header className="bg-[#4e2773] text-white shadow-md">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link href="/" className="text-2xl font-bold">
-            Ben's Top Chef Fantasy league
+            Ben's Top Chef Fantasy League 2025! 🧑‍🍳🏆
           </Link>
           <nav>
             <ul className="flex space-x-6">
@@ -39,8 +39,7 @@ const Layout = ({ children }) => {
       <footer className="bg-gray-800 text-white mt-auto">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="text-center">
-            <p>&copy; {new Date().getFullYear()} Top Chef Fantasy League</p>
-            <p className="text-gray-400 text-sm mt-1">Not affiliated with Top Chef or Bravo TV.</p>
+            <p>&copy; {new Date().getFullYear()} Ben (& LLMs). Good luck!</p>
           </div>
         </div>
       </footer>
